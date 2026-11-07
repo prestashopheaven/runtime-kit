@@ -2,25 +2,26 @@
 /**
  * NOTICE OF LICENSE
  *
- * This source file is subject to the Academic Free License version 3.0
+ * This source file is subject to the MIT License
  * that is bundled with this package in the file LICENSE.md.
  * It is also available through the world-wide-web at this URL:
- * https://opensource.org/licenses/AFL-3.0
+ * https://opensource.org/licenses/MIT
  *
- * @author    George van Engers | PrestaHaven.com
+ * @author    prestahaven.com
  * @copyright Since 2026 George van Engers
- * @license   https://opensource.org/licenses/AFL-3.0 Academic Free License version 3.0
+ * @license   https://opensource.org/licenses/MIT MIT License
  */
 
 declare(strict_types=1);
 
-namespace PrestaShopHeaven\ModuleKit;
+namespace PrestaShopHeaven\Runtime\Kit;
 
-use PrestaShopHeaven\ModuleKit\Definition\ModuleDefinitionInterface;
-use PrestaShopHeaven\ModuleKit\Install\Installer;
-use PrestaShopHeaven\ModuleKit\Install\Uninstaller;
-use PrestaShopHeaven\ModuleKit\Shop\ShopScope;
-use PrestaShopHeaven\ModuleKit\Updater\UpdaterNotice;
+use PrestaShopHeaven\Runtime\Kit\Definition\ModuleDefinitionInterface;
+use PrestaShopHeaven\Runtime\Kit\Install\Installer;
+use PrestaShopHeaven\Runtime\Kit\Install\TabBuilder;
+use PrestaShopHeaven\Runtime\Kit\Install\Uninstaller;
+use PrestaShopHeaven\Runtime\Kit\Shop\ShopScope;
+use PrestaShopHeaven\Runtime\Kit\Updater\UpdaterNotice;
 
 if (!defined('_PS_VERSION_')) {
     exit;
@@ -97,13 +98,18 @@ trait ModuleBase
 
     /**
      * Returns the back-office tabs of the module from its definition. PrestaShop reads
-     * this on install (to create the tabs) and on uninstall (to remove them).
+     * this on install (to create the tabs) and on uninstall (to remove them). With a
+     * ModuleDefinition::TABS_WORDING_DOMAIN the names are translated into every shop
+     * language (TabBuilder); without one they are returned as they are.
      *
      * @return array<int, array<string, mixed>>
      */
     public function getTabs()
     {
-        return $this->getModuleDefinition()->tabs();
+        $definition = $this->getModuleDefinition();
+        $domain = $definition->tabsWordingDomain();
+
+        return $domain === '' ? $definition->tabs() : TabBuilder::build($this, $definition->tabs(), $domain);
     }
 
     /**

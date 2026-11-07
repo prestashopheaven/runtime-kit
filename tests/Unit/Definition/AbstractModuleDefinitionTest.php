@@ -2,23 +2,23 @@
 /**
  * NOTICE OF LICENSE
  *
- * This source file is subject to the Academic Free License version 3.0
+ * This source file is subject to the MIT License
  * that is bundled with this package in the file LICENSE.md.
  * It is also available through the world-wide-web at this URL:
- * https://opensource.org/licenses/AFL-3.0
+ * https://opensource.org/licenses/MIT
  *
- * @author    George van Engers | PrestaHaven.com
+ * @author    prestahaven.com
  * @copyright Since 2026 George van Engers
- * @license   https://opensource.org/licenses/AFL-3.0 Academic Free License version 3.0
+ * @license   https://opensource.org/licenses/MIT MIT License
  */
 
 declare(strict_types=1);
 
-namespace PrestaShopHeaven\ModuleKit\Tests\Unit\Definition;
+namespace PrestaShopHeaven\Runtime\Kit\Tests\Unit\Definition;
 
 use PHPUnit\Framework\TestCase;
-use PrestaShopHeaven\ModuleKit\Definition\AbstractModuleDefinition;
-use PrestaShopHeaven\ModuleKit\Definition\DataDirectoriesInterface;
+use PrestaShopHeaven\Runtime\Kit\Definition\AbstractModuleDefinition;
+use PrestaShopHeaven\Runtime\Kit\Definition\DataDirectoriesInterface;
 
 /**
  * A module definition only overrides constants; the base methods must return them.
@@ -40,7 +40,27 @@ final class AbstractModuleDefinitionTest extends TestCase
         self::assertSame('migrations/up/', $definition->migrationsUpDirectory());
         self::assertSame('migrations/down/', $definition->migrationsDownDirectory());
         self::assertSame([], $definition->dataDirectories());
+        self::assertSame('', $definition->tabsWordingDomain());
+        self::assertSame([], $definition->configurationPage());
+        self::assertSame([], $definition->adminScripts());
         self::assertInstanceOf(DataDirectoriesInterface::class, $definition);
+    }
+
+    /**
+     * The tab domain and the configuration page come from their constants.
+     */
+    public function testTabsWordingDomainAndConfigurationPage(): void
+    {
+        $definition = new class extends AbstractModuleDefinition {
+            public const TABS_WORDING_DOMAIN = 'Modules.Mymodule.Admin';
+            public const CONFIGURATION_PAGE = ['controller' => 'AdminMyModuleSettings', 'route' => 'mymodule_settings'];
+            public const ADMIN_SCRIPTS = ['AdminMyModuleSettings' => ['admin-settings']];
+        };
+
+        self::assertSame(['AdminMyModuleSettings' => ['admin-settings']], $definition->adminScripts());
+
+        self::assertSame('Modules.Mymodule.Admin', $definition->tabsWordingDomain());
+        self::assertSame(['controller' => 'AdminMyModuleSettings', 'route' => 'mymodule_settings'], $definition->configurationPage());
     }
 
     /**

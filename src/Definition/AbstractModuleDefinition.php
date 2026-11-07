@@ -2,19 +2,19 @@
 /**
  * NOTICE OF LICENSE
  *
- * This source file is subject to the Academic Free License version 3.0
+ * This source file is subject to the MIT License
  * that is bundled with this package in the file LICENSE.md.
  * It is also available through the world-wide-web at this URL:
- * https://opensource.org/licenses/AFL-3.0
+ * https://opensource.org/licenses/MIT
  *
- * @author    George van Engers | PrestaHaven.com
+ * @author    prestahaven.com
  * @copyright Since 2026 George van Engers
- * @license   https://opensource.org/licenses/AFL-3.0 Academic Free License version 3.0
+ * @license   https://opensource.org/licenses/MIT MIT License
  */
 
 declare(strict_types=1);
 
-namespace PrestaShopHeaven\ModuleKit\Definition;
+namespace PrestaShopHeaven\Runtime\Kit\Definition;
 
 if (!defined('_PS_VERSION_')) {
     exit;
@@ -56,6 +56,28 @@ abstract class AbstractModuleDefinition implements ModuleDefinitionInterface, Da
      * @var array<int, array<string, mixed>>
      */
     public const TABS = [];
+
+    /**
+     * Translation domain of the tab names ('wording' of each tab), e.g. 'Modules.Heavenfoo.Admin'. With a domain the
+     * names are translated into every shop language (TabBuilder); '' keeps the names of TABS as they are.
+     */
+    public const TABS_WORDING_DOMAIN = '';
+
+    /**
+     * The page the Configure button opens (trait ConfigurationPage): ['controller' => 'AdminHeavenfooSettings',
+     * 'route' => 'heavenfoo_settings']. Empty: Admin<Module>Configuration and <module>_configuration.
+     *
+     * @var array{controller?: string, route?: string}
+     */
+    public const CONFIGURATION_PAGE = [];
+
+    /**
+     * The scripts of the module per own back-office page: ['AdminHeavenfooRules' => ['admin-rules']] loads
+     * views/js/admin-rules.js on that page (runtime-admin-assets, trait AdminScripts).
+     *
+     * @var array<string, list<string>>
+     */
+    public const ADMIN_SCRIPTS = [];
 
     /**
      * Directories the module writes outside its own folder, relative to the PrestaShop root
@@ -110,6 +132,34 @@ abstract class AbstractModuleDefinition implements ModuleDefinitionInterface, Da
     public function tabs(): array
     {
         return static::TABS;
+    }
+
+    /**
+     * Returns the translation domain of the tab names from static::TABS_WORDING_DOMAIN.
+     */
+    public function tabsWordingDomain(): string
+    {
+        return static::TABS_WORDING_DOMAIN;
+    }
+
+    /**
+     * Returns the page of the Configure button from static::CONFIGURATION_PAGE.
+     *
+     * @return array{controller?: string, route?: string}
+     */
+    public function configurationPage(): array
+    {
+        return static::CONFIGURATION_PAGE;
+    }
+
+    /**
+     * Returns the scripts per back-office page from static::ADMIN_SCRIPTS.
+     *
+     * @return array<string, list<string>>
+     */
+    public function adminScripts(): array
+    {
+        return static::ADMIN_SCRIPTS;
     }
 
     /**

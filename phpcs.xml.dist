@@ -1,8 +1,0 @@
-<?xml version="1.0"?>
-<ruleset name="module-kit PHP compatibility">
-    <file>src</file>
-    <arg name="extensions" value="php"/>
-    <arg value="ps"/>
-    <config name="testVersion" value="8.1-"/>
-    <rule ref="PHPCompatibility"/>
-</ruleset>

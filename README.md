@@ -17,7 +17,7 @@ Gedeelde basis voor alle PrestaHaven-modules (PrestaShop 8.0 – 9.x, PHP 8.1+).
 // heavenfoo.php: alleen de constructor, de rest via traits
 class Heavenfoo extends Module
 {
-    use \PrestaShopHeaven\ModuleKit\ModuleBase;
+    use \PrestaShopHeaven\Runtime\Kit\ModuleBase;
     use \PrestaShopHeaven\Foo\Module\Helper\Definition; // getModuleDefinition()
 
     public function __construct() { /* identiteit */ }
@@ -44,7 +44,7 @@ als segment hebben; anders mislukt de uninstall met een melding. Symbolische lin
 // upgrade/upgrade-1.1.0.php
 function upgrade_module_1_1_0($module): bool
 {
-    return \PrestaShopHeaven\ModuleKit\Upgrade\Upgrade::apply($module, ['202611011200']);
+    return \PrestaShopHeaven\Runtime\Kit\Upgrade\Upgrade::apply($module, ['202611011200']);
 }
 ```
 
@@ -76,7 +76,7 @@ dan zelf in het template. De Addons-build laat `src/Updater` weg, dus altijd met
 `::class`, zodat het scopen de naam meeneemt):
 
 ```php
-use PrestaShopHeaven\ModuleKit\Updater\UpdaterNotice;
+use PrestaShopHeaven\Runtime\Kit\Updater\UpdaterNotice;
 
 $help = class_exists(UpdaterNotice::class) ? UpdaterNotice::helpLink($this) : '';
 // Twig: {{ help|raw }}    Smarty: {$help nofilter}   (de knop is al ge-escapete HTML)

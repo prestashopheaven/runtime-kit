@@ -2,19 +2,19 @@
 /**
  * NOTICE OF LICENSE
  *
- * This source file is subject to the Academic Free License version 3.0
+ * This source file is subject to the MIT License
  * that is bundled with this package in the file LICENSE.md.
  * It is also available through the world-wide-web at this URL:
- * https://opensource.org/licenses/AFL-3.0
+ * https://opensource.org/licenses/MIT
  *
- * @author    George van Engers | PrestaHaven.com
+ * @author    prestahaven.com
  * @copyright Since 2026 George van Engers
- * @license   https://opensource.org/licenses/AFL-3.0 Academic Free License version 3.0
+ * @license   https://opensource.org/licenses/MIT MIT License
  */
 
 declare(strict_types=1);
 
-namespace PrestaShopHeaven\ModuleKit\Definition;
+namespace PrestaShopHeaven\Runtime\Kit\Definition;
 
 if (!defined('_PS_VERSION_')) {
     exit;
@@ -56,6 +56,28 @@ interface ModuleDefinitionInterface
      * @return array<int, array<string, mixed>>
      */
     public function tabs(): array;
+
+    /**
+     * Returns the translation domain of the tab names ('wording' of each tab), or '' to keep the names of tabs() as
+     * they are.
+     */
+    public function tabsWordingDomain(): string;
+
+    /**
+     * Returns the page the Configure button opens: ['controller' => legacy tab class, 'route' => Symfony route], or
+     * [] for the convention Admin<Module>Configuration / <module>_configuration.
+     *
+     * @return array{controller?: string, route?: string}
+     */
+    public function configurationPage(): array;
+
+    /**
+     * Returns the scripts of the module per own back-office page: legacy controller name => script names in
+     * views/js/ (without .js), loaded after the admin theme on that page only (HK-11, runtime-admin-assets).
+     *
+     * @return array<string, list<string>>
+     */
+    public function adminScripts(): array;
 
     /**
      * Returns the directory with the install migrations, relative to the module root.

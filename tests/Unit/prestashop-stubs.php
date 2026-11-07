@@ -2,14 +2,14 @@
 /**
  * NOTICE OF LICENSE
  *
- * This source file is subject to the Academic Free License version 3.0
+ * This source file is subject to the MIT License
  * that is bundled with this package in the file LICENSE.md.
  * It is also available through the world-wide-web at this URL:
- * https://opensource.org/licenses/AFL-3.0
+ * https://opensource.org/licenses/MIT
  *
- * @author    George van Engers | PrestaHaven.com
+ * @author    prestahaven.com
  * @copyright Since 2026 George van Engers
- * @license   https://opensource.org/licenses/AFL-3.0 Academic Free License version 3.0
+ * @license   https://opensource.org/licenses/MIT MIT License
  */
 
 /*
@@ -34,6 +34,22 @@ if (!class_exists('Module', false)) {
         public static function isInstalled(string $moduleName): bool
         {
             return in_array($moduleName, self::$installed, true);
+        }
+
+        /**
+         * A translator that marks the text with its domain and locale, so tests can see what was asked.
+         */
+        public function getTranslator(): object
+        {
+            return new class {
+                /**
+                 * @param array<string, mixed> $parameters
+                 */
+                public function trans(string $id, array $parameters = [], ?string $domain = null, ?string $locale = null): string
+                {
+                    return "$id [$domain/$locale]";
+                }
+            };
         }
     }
 }
@@ -112,9 +128,17 @@ if (!class_exists('Tools', false)) {
         /** @var array<string, string> */
         public static array $values = [];
 
+        /** @var list<string> the URLs redirectAdmin() was called with */
+        public static array $redirects = [];
+
         public static function getValue(string $key, mixed $default = false): mixed
         {
             return self::$values[$key] ?? $default;
+        }
+
+        public static function redirectAdmin(string $url): void
+        {
+            self::$redirects[] = $url;
         }
     }
 }
