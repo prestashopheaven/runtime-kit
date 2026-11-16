@@ -4,9 +4,10 @@ Gedeelde basis voor alle PrestaHaven-modules (PrestaShop 8.0 – 9.x, PHP 8.1+).
 
 | Onderdeel | Wat |
 |---|---|
-| `ModuleBase` (trait) | `install()`, `uninstall()`, `getTabs()`, `isUsingNewTranslationSystem()` voor de hoofdklasse |
+| `ModuleBase` (trait) | `install()`, `uninstall()`, `getTabs()`, `getDefinedTabs()`, `isUsingNewTranslationSystem()` voor de hoofdklasse |
 | `Definition\AbstractModuleDefinition` | Basis voor de `ModuleDefinition` van een module: alleen constanten overschrijven |
-| `Install\Installer` / `Uninstaller` | Migraties, hooks, configuratie, gegenereerde secrets |
+| `Install\Installer` / `Uninstaller` | Migraties, hooks, configuratie, gegenereerde secrets, tabs |
+| `Install\TabSynchronizer` | Tabs gelijk aan `TABS` bij installatie en upgrade (ook een eigen menu, vanaf 1.1.0) |
 | `Install\Migrator` | SQL-migraties (`migrations/up` + `down`), engine: vanengers/prestashop-library-product-admin-helper |
 | `Upgrade\Upgrade` | Helper voor `upgrade/upgrade-X.Y.Z.php` |
 | `Shop\ShopScope` | Multistore: `runInAllShops()`, `isModuleActiveInShop()`, `shopIds()` |
@@ -49,7 +50,27 @@ function upgrade_module_1_1_0($module): bool
 ```
 
 `Upgrade::apply()` draait de nieuwe migraties en registreert daarna alle hooks en ontbrekende
-config-sleutels uit de definitie. Een upgrade komt zo op hetzelfde uit als een verse installatie.
+config-sleutels uit de definitie, en zet de tabs gelijk aan `TABS` (vanaf 1.1.0, `Install\TabSynchronizer`). Een
+upgrade komt zo op hetzelfde uit als een verse installatie.
+
+### Eigen menu (vanaf 1.1.0)
+
+Een module kan een eigen menu-item met submenu hebben: een oudertab onder `SELL` (of `IMPROVE`, `CONFIGURE`) met een
+route (de pagina waar het item heen gaat) en de pagina's als kinderen. De kit maakt de tabs zelf aan bij installatie en
+bij elke upgrade, dus ook het verplaatsen van bestaande pagina's naar het nieuwe menu gaat vanzelf. De kopie
+`<ouder>_MTR` die PrestaShop anders van een eigen oudertab maakt (een dubbel menu-item), komt er niet.
+
+```php
+public const TABS = [
+    ['class_name' => 'AdminParentHeavenfoo', 'route_name' => 'heavenfoo_items', 'parent_class_name' => 'SELL',
+        'visible' => true, 'icon' => 'timeline', 'wording' => 'Foo'],
+    ['class_name' => 'AdminHeavenfooItems', 'route_name' => 'heavenfoo_items', 'parent_class_name' => 'AdminParentHeavenfoo',
+        'visible' => true, 'wording' => 'Items'],
+];
+```
+
+Tabs van de module die niet meer in `TABS` staan, worden bij een upgrade verwijderd (behalve de `_legacy_controller`
+van een route of een controller in `controllers/admin`, die PrestaShop zelf registreert).
 
 ## Multistore
 

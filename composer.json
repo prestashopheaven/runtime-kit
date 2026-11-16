@@ -43,7 +43,10 @@
                 "configure button",
                 "updater notice",
                 "help button",
-                "module definition"
+                "module definition",
+                "own menu",
+                "parent tab",
+                "tab sync"
             ],
             "phpstan-paths": [
                 "src",
@@ -52,6 +55,7 @@
             "integration-tested": [
                 "src/Install/Installer.php",
                 "src/Install/Migrator.php",
+                "src/Install/TabSynchronizer.php",
                 "src/Install/Uninstaller.php",
                 "src/ModuleBase.php",
                 "src/Shop/ShopScope.php",

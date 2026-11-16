@@ -41,13 +41,18 @@ if (!defined('_PS_VERSION_')) {
 trait ModuleBase
 {
     /**
+     * True right after install() created the tabs itself, until PrestaShop's tab register has read getTabs() once.
+     */
+    private bool $kitCreatedTabs = false;
+
+    /**
      * Returns the definition of the module: hooks, configuration, tabs and migrations.
      */
     abstract public function getModuleDefinition(): ModuleDefinitionInterface;
 
     /**
-     * Installs the module: first the PrestaShop registration (parent::install(), which
-     * also creates the tabs), then migrations, hooks and configuration.
+     * Installs the module: first the PrestaShop registration (parent::install()), then migrations, hooks,
+     * configuration and the back-office tabs (Installer).
      *
      * Runs in the "all shops" context, so the module is enabled in every shop and the
      * default configuration is global (MS-02), also when installed from one shop or the CLI.
@@ -67,6 +72,7 @@ trait ModuleBase
 
                 return false;
             }
+            $this->kitCreatedTabs = true;
 
             return true;
         });
@@ -97,19 +103,41 @@ trait ModuleBase
     }
 
     /**
-     * Returns the back-office tabs of the module from its definition. PrestaShop reads
-     * this on install (to create the tabs) and on uninstall (to remove them). With a
-     * ModuleDefinition::TABS_WORDING_DOMAIN the names are translated into every shop
-     * language (TabBuilder); without one they are returned as they are.
+     * Returns the back-office tabs of the module (getDefinedTabs()). The kit creates them itself on install and upgrade
+     * (Installer, TabSynchronizer): PrestaShop's tab register, which reads this list right after install(), would copy
+     * a parent tab of the module as "<parent>_MTR" when its first child is added (a second menu entry with the same
+     * page) and log "already exists" for the others. So the first call after install() gives only the tabs the kit
+     * could not create (normally none); every other call (the module page's "reload the menu" check, uninstall) gives
+     * them all.
      *
      * @return array<int, array<string, mixed>>
      */
     public function getTabs()
     {
+        $tabs = $this->getDefinedTabs();
+        if (!$this->kitCreatedTabs) {
+            return $tabs;
+        }
+        $this->kitCreatedTabs = false;
+
+        return array_values(array_filter(
+            $tabs,
+            static fn (array $tab): bool => (int) \Tab::getIdFromClassName((string) ($tab['class_name'] ?? '')) === 0
+        ));
+    }
+
+    /**
+     * Returns every back-office tab of the module's definition. With a ModuleDefinition::TABS_WORDING_DOMAIN the names
+     * are translated into every shop language (TabBuilder); without one they are returned as they are.
+     *
+     * @return array<int, array<string, mixed>>
+     */
+    public function getDefinedTabs(): array
+    {
         $definition = $this->getModuleDefinition();
         $domain = $definition->tabsWordingDomain();
 
-        return $domain === '' ? $definition->tabs() : TabBuilder::build($this, $definition->tabs(), $domain);
+        return $domain === '' ? array_values($definition->tabs()) : TabBuilder::build($this, $definition->tabs(), $domain);
     }
 
     /**

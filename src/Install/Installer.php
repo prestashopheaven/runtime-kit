@@ -57,26 +57,45 @@ final class Installer
 
     /**
      * Runs a full install: all up migrations, all hooks, configuration with default
-     * values (overwriting existing values) and generated secrets.
+     * values (overwriting existing values), generated secrets and the back-office tabs.
      */
     public function install(): bool
     {
         return $this->runAllMigrations()
             && $this->registerHooks()
             && $this->installConfiguration(true)
-            && $this->installGeneratedConfiguration();
+            && $this->installGeneratedConfiguration()
+            && $this->syncTabs();
     }
 
     /**
      * For upgrades: makes an existing installation match the definition. Registers
-     * every hook (registering twice is harmless) and adds configuration keys that do
-     * not exist yet. Existing values are never overwritten.
+     * every hook (registering twice is harmless), adds configuration keys that do
+     * not exist yet (existing values are never overwritten) and brings the back-office
+     * tabs in line with the definition (TabSynchronizer: PrestaShop creates tabs only on install, INS-07).
      */
     public function syncDefinition(): bool
     {
         return $this->registerHooks()
             && $this->installConfiguration(false)
-            && $this->installGeneratedConfiguration();
+            && $this->installGeneratedConfiguration()
+            && $this->syncTabs();
+    }
+
+    /**
+     * Creates, moves, updates and removes the module's tabs until they match the definition, with the translated names
+     * of ModuleBase::getDefinedTabs() (the plain definition for a module without ModuleBase).
+     */
+    public function syncTabs(): bool
+    {
+        $tabs = method_exists($this->module, 'getDefinedTabs') ? $this->module->getDefinedTabs() : $this->definition->tabs();
+        $synchronizer = new TabSynchronizer($this->module, is_array($tabs) ? $tabs : []);
+        if ($synchronizer->sync()) {
+            return true;
+        }
+        $this->errors = array_merge($this->errors, $synchronizer->getErrors());
+
+        return false;
     }
 
     /**

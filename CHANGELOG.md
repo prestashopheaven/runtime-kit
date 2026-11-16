@@ -1,5 +1,23 @@
 # Changelog
 
+## [1.1.0] - 2026-11-16
+
+### Toegevoegd
+- `Install\TabSynchronizer`: maakt de admin-tabs van een geïnstalleerde module gelijk aan `ModuleDefinition::TABS`:
+  ontbrekende tabs aanmaken (ouders van de definitie vóór hun kinderen), bestaande tabs verplaatsen en bijwerken
+  (ouder, route, zichtbaar, icoon, vertaalde namen), tabs van de module die niet meer in de definitie staan verwijderen
+  (behalve de `_legacy_controller` van een route of een controller in `controllers/admin`), en de kopie
+  `<ouder>_MTR` die PrestaShop van een eigen oudertab maakt verwijderen. Tabs van PrestaShop of andere modules blijven
+  altijd staan.
+- `Installer::syncTabs()`; `install()` en `syncDefinition()` (dus `Upgrade::apply()`) roepen hem aan: een upgrade
+  geeft nu hetzelfde menu als een verse installatie (INS-07 automatisch), ook een eigen menu onder SELL.
+- `ModuleBase::getDefinedTabs()`: alle tabs van de definitie met vertaalde namen.
+
+### Gewijzigd
+- `ModuleBase::getTabs()` geeft PrestaShop direct na `install()` alleen de tabs die de kit niet kon maken (normaal
+  geen): de tab-register van PrestaShop zou anders een eigen oudertab dubbel zetten (`_MTR`) en "already exists" loggen.
+  Elke andere aanroep geeft alle tabs.
+
 ## [1.5.0] - 2026-10-28
 
 ### Toegevoegd

@@ -29,11 +29,16 @@ final class ModuleBaseTest extends TestCase
     {
         $tabs = $this->module()->getTabs();
 
-        self::assertCount(1, $tabs);
-        self::assertSame('AdminHeavenmonocoreConfiguration', $tabs[0]['class_name']);
-        self::assertSame('Modules.Heavenmonocore.Admin', $tabs[0]['wording_domain']);
-        foreach (\Language::getLanguages(false) as $language) {
-            self::assertNotSame('', (string) ($tabs[0]['name'][$language['locale']] ?? ''), "name in {$language['locale']}");
+        self::assertSame(
+            ['AdminParentHeavenmonocore', 'AdminHeavenmonocoreItems', 'AdminHeavenmonocoreConfiguration'],
+            array_column($tabs, 'class_name')
+        );
+        self::assertSame($tabs, $this->module()->getDefinedTabs(), 'outside an install getTabs() gives every tab');
+        foreach ($tabs as $tab) {
+            self::assertSame('Modules.Heavenmonocore.Admin', $tab['wording_domain']);
+            foreach (\Language::getLanguages(false) as $language) {
+                self::assertNotSame('', (string) ($tab['name'][$language['locale']] ?? ''), "name of {$tab['class_name']} in {$language['locale']}");
+            }
         }
     }
 
